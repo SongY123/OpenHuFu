@@ -1,9 +1,9 @@
 {
-    "port": 54600,
+    "port": 54601,
     "url": "jdbc:postgresql://localhost:54321/osm_db",
     "catalog": "osm_db",
     "user": "hufu",
-    "passwd": "bda613+",
+    "passwd": "hufu",
     "tables": [
         {
             "name": "traffic_2_1",

@@ -36,3 +36,5 @@ hs_err_pid*
 /fed-run.sh
 /fed-statistics.sh
 /fed-run-traffic.sh
+/hufu-demo-osm/cli/output/
+/hufu-demo-osm/driver/pid

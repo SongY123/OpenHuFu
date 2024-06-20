@@ -1,0 +1,5 @@
+SELECT id FROM traffic WHERE KNN(Point(116.4565201, 39.891922), location, 4)
+SELECT id FROM traffic WHERE KNN(Point(116.3637314, 39.8299103), location, 4)
+SELECT id FROM traffic WHERE KNN(Point(116.26774, 39.94343), location, 4)
+SELECT id FROM traffic WHERE KNN(Point(116.487043, 39.992348), location, 4)
+SELECT id FROM traffic WHERE KNN(Point(116.38853, 39.87011), location, 4)

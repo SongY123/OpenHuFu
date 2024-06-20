@@ -22,7 +22,7 @@
       },
       "tables": [
         {
-          "name": "osm",
+          "name": "traffic",
           "factory": "group.bda.federate.sql.table.FederateTableFactory",
           "operand": {
             "feds": [

@@ -1,0 +1,46 @@
+# range_query
+sh start_evaluation.sh traffic_6 traffic_sql/range_query-area/query_area_e_3_range_query_traffic range_query
+sh start_evaluation.sh traffic_6 traffic_sql/range_query-area/query_area_e_4_range_query_traffic range_query
+sh start_evaluation.sh traffic_6 traffic_sql/range_query-area/query_area_e_5_range_query_traffic range_query
+sh start_evaluation.sh traffic_6 traffic_sql/range_query-area/query_area_e_6_range_query_traffic range_query
+sh start_evaluation.sh traffic_6 traffic_sql/range_query-area/query_area_e_7_range_query_traffic range_query
+
+# range_count
+sh start_evaluation.sh traffic_6 traffic_sql/range_count-area/query_area_e_3_range_count_traffic range_count
+sh start_evaluation.sh traffic_6 traffic_sql/range_count-area/query_area_e_4_range_count_traffic range_count
+sh start_evaluation.sh traffic_6 traffic_sql/range_count-area/query_area_e_5_range_count_traffic range_count
+sh start_evaluation.sh traffic_6 traffic_sql/range_count-area/query_area_e_6_range_count_traffic range_count
+sh start_evaluation.sh traffic_6 traffic_sql/range_count-area/query_area_e_7_range_count_traffic range_count
+
+# knn
+sh start_evaluation.sh traffic_6 traffic_sql/knn-k/limit_4_knn_traffic knn
+sh start_evaluation.sh traffic_6 traffic_sql/knn-k/limit_8_knn_traffic knn
+sh start_evaluation.sh traffic_6 traffic_sql/knn-k/limit_16_knn_traffic knn
+sh start_evaluation.sh traffic_6 traffic_sql/knn-k/limit_32_knn_traffic knn
+sh start_evaluation.sh traffic_6 traffic_sql/knn-k/limit_64_knn_traffic knn
+
+# silo=2
+sh start_evaluation.sh traffic_2 traffic_sql/silo/silo_number_range_query_traffic range_query
+sh start_evaluation.sh traffic_2 traffic_sql/silo/silo_number_count_query_traffic range_count
+sh start_evaluation.sh traffic_2 traffic_sql/silo/silo_number_knn_query_traffic knn
+
+# silo=4
+sh start_evaluation.sh traffic_4 traffic_sql/silo/silo_number_range_query_traffic range_query
+sh start_evaluation.sh traffic_4 traffic_sql/silo/silo_number_count_query_traffic range_count
+sh start_evaluation.sh traffic_4 traffic_sql/silo/silo_number_knn_query_traffic knn
+
+# silo=6
+sh start_evaluation.sh traffic_6 traffic_sql/silo/silo_number_range_query_traffic range_query
+sh start_evaluation.sh traffic_6 traffic_sql/silo/silo_number_count_query_traffic range_count
+sh start_evaluation.sh traffic_6 traffic_sql/silo/silo_number_knn_query_traffic knn
+
+# silo=8
+sh start_evaluation.sh traffic_8 traffic_sql/silo/silo_number_range_query_traffic range_query
+sh start_evaluation.sh traffic_8 traffic_sql/silo/silo_number_count_query_traffic range_count
+sh start_evaluation.sh traffic_8 traffic_sql/silo/silo_number_knn_query_traffic knn
+
+# silo=10
+sh start_evaluation.sh traffic_10 traffic_sql/silo/silo_number_range_query_traffic range_query
+sh start_evaluation.sh traffic_10 traffic_sql/silo/silo_number_count_query_traffic range_count
+sh start_evaluation.sh traffic_10 traffic_sql/silo/silo_number_knn_query_traffic knn
+
