@@ -35,7 +35,7 @@ public class BatchTest {
       final String m = cmd.getOptionValue("model", "model.json");
       final String s = cmd.getOptionValue("sql", "sql");
       final String t = cmd.getOptionValue("type", "range_query");
-      String[] splitS = s.split(File.separator);
+      String[] splitS = m.split(File.separator);
       String dataset = splitS[splitS.length - 2];
       String resultDir = OUTPUT_DIR + dataset + "/result";
       String logDir = OUTPUT_DIR + dataset + "/logs";
@@ -60,8 +60,8 @@ public class BatchTest {
 
   private static void executeSqlFile(Connection conn, String resultDir, String logDir, Path path) {
     String fileName = path.getFileName().toString();
-    String resultFileName = resultDir + "/" + fileName.substring(0, fileName.lastIndexOf('.')) + ".csv";
-    String logFileName = logDir + "/" + fileName.substring(0, fileName.lastIndexOf('.')) + ".log";
+    String resultFileName = resultDir + "/" + fileName + ".csv";
+    String logFileName = logDir + "/" + fileName + ".log";
 
     try (BufferedReader reader = Files.newBufferedReader(path);
          PrintWriter writer = new PrintWriter(new FileWriter(resultFileName))) {

@@ -35,3 +35,4 @@ hs_err_pid*
 /output/
 /fed-run.sh
 /fed-statistics.sh
+/fed-run-traffic.sh

@@ -10,14 +10,17 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LaplaceFilterTests {
+public class RangeQueryLaplaceFilterTests {
 
   public static void main(String[] args) {
-    double[] longitudes = {110.19075, 114.2250746, 120.8391325, 88.7105832, 110.0375095};
-    double[] latitudes = {18.95975, 22.4224543, 29.2714912, 27.6365303, 19.9629952};
+//    double[] longitudes = {110.19075, 114.2250746, 120.8391325, 88.7105832, 110.0375095};
+//    double[] latitudes = {18.95975, 22.4224543, 29.2714912, 27.6365303, 19.9629952};
+//    double[] radius = {0.0935247, 0.0935247, 0.0935247, 0.0935247, 0.0935247};
+    double[] longitudes = {120.90809, 120.7471905, 120.74455, 120.145087, 120.0938017};
+    double[] latitudes = {30.36696, 31.1709233, 31.1784, 30.1439031, 30.2162853};
     double[] radius = {0.0935247, 0.0935247, 0.0935247, 0.0935247, 0.0935247};
     List<Double> radio = new ArrayList<>();
-    String table = "osm_7";
+    String table = "osm_4";
     int totalCount = 1;
 
     String totalSql = String.format("SELECT count(*) from %s", table);
