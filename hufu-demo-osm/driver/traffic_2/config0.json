@@ -3,7 +3,7 @@
     "url": "jdbc:postgresql://localhost:54321/osm_db",
     "catalog": "osm_db",
     "user": "hufu",
-    "passwd": "hufu",
+    "passwd": "bda613+",
     "tables": [
         {
             "name": "traffic_2_0",
