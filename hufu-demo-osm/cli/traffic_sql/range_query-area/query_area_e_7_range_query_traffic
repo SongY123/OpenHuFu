@@ -1,0 +1,5 @@
+SELECT id FROM traffic WHERE DWithin(Point(116.471352, 39.921566), location, 0.0003039)
+SELECT id FROM traffic WHERE DWithin(Point(116.6053162, 40.0323448), location, 0.0003039)
+SELECT id FROM traffic WHERE DWithin(Point(116.4744186, 40.0403786), location, 0.0003039)
+SELECT id FROM traffic WHERE DWithin(Point(116.37287, 39.950146), location, 0.0003039)
+SELECT id FROM traffic WHERE DWithin(Point(116.3381, 39.8472), location, 0.0003039)

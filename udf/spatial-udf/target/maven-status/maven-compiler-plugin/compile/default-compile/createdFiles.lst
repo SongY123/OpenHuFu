@@ -1,0 +1,4 @@
+com/hufudb/openhufu/udf/Distance.class
+com/hufudb/openhufu/udf/KNN.class
+com/hufudb/openhufu/udf/DWithin.class
+com/hufudb/openhufu/udf/Point.class

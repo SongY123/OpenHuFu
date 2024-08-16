@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>OwnerConfig.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">openhufu-adapter-csv</a> &gt; <a href="../index.html" class="el_bundle">openhufu-owner</a> &gt; <a href="index.source.html" class="el_package">com.hufudb.openhufu.owner.config</a> &gt; <span class="el_source">OwnerConfig.java</span></div><h1>OwnerConfig.java</h1><pre class="source lang-java linenums">package com.hufudb.openhufu.owner.config;
+
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import com.hufudb.openhufu.data.schema.utils.PojoPublishedTableSchema;
+import com.hufudb.openhufu.mpc.ProtocolExecutor;
+import com.hufudb.openhufu.mpc.ProtocolType;
+import com.hufudb.openhufu.owner.adapter.Adapter;
+import com.hufudb.openhufu.rpc.Party;
+import com.hufudb.openhufu.rpc.grpc.OpenHuFuRpc;
+import io.grpc.ChannelCredentials;
+import io.grpc.ServerCredentials;
+
+public class OwnerConfig {
+  public Party party;
+  public int port;
+  public String hostname;
+  public ExecutorService threadPool;
+  public Adapter adapter;
+  public OpenHuFuRpc acrossOwnerRpc;
+  public boolean useTLS;
+  public ServerCredentials serverCerts;
+  public ChannelCredentials clientCerts;
+  public List&lt;PojoPublishedTableSchema&gt; tables;
+  public Map&lt;ProtocolType, ProtocolExecutor&gt; librarys;
+  public String implementorConfigPath;
+<span class="nc" id="L28">  public OwnerConfig() {}</span>
+
+  public OwnerConfig(Party party, int port, String hostname, ExecutorService threadPool,
+      Adapter adapter, OpenHuFuRpc acrossOwnerRpc, boolean useTLS, ServerCredentials serverCerts,
+<span class="nc" id="L32">      ChannelCredentials clientCerts, List&lt;PojoPublishedTableSchema&gt; tables) {</span>
+<span class="nc" id="L33">    this.party = party;</span>
+<span class="nc" id="L34">    this.port = port;</span>
+<span class="nc" id="L35">    this.hostname = hostname;</span>
+<span class="nc" id="L36">    this.threadPool = threadPool;</span>
+<span class="nc" id="L37">    this.adapter = adapter;</span>
+<span class="nc" id="L38">    this.acrossOwnerRpc = acrossOwnerRpc;</span>
+<span class="nc" id="L39">    this.useTLS = useTLS;</span>
+<span class="nc" id="L40">    this.serverCerts = serverCerts;</span>
+<span class="nc" id="L41">    this.clientCerts = clientCerts;</span>
+<span class="nc" id="L42">    this.tables = tables;</span>
+<span class="nc" id="L43">  }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

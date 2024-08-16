@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>SafeUnion.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">openhufu-adapter-csv</a> &gt; <a href="../index.html" class="el_bundle">openhufu-owner</a> &gt; <a href="index.source.html" class="el_package">com.hufudb.openhufu.owner.implementor.union</a> &gt; <span class="el_source">SafeUnion.java</span></div><h1>SafeUnion.java</h1><pre class="source lang-java linenums">package com.hufudb.openhufu.owner.implementor.union;
+
+import com.hufudb.openhufu.data.storage.DataSet;
+import com.hufudb.openhufu.mpc.ProtocolException;
+import com.hufudb.openhufu.mpc.union.SecretUnion;
+import com.hufudb.openhufu.proto.OpenHuFuPlan;
+import com.hufudb.openhufu.rpc.Rpc;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+
+<span class="nc" id="L12">public class SafeUnion implements OwnerUnion {</span>
+
+<span class="nc" id="L14">  static final Logger LOG = LoggerFactory.getLogger(SafeUnion.class);</span>
+
+  @Override
+  public DataSet union(DataSet in, Rpc rpc, OpenHuFuPlan.TaskInfo taskInfo) throws ProtocolException {
+<span class="nc" id="L18">    LOG.info(&quot;using safe union.&quot;);</span>
+<span class="nc" id="L19">    SecretUnion secretUnion = new SecretUnion(rpc);</span>
+<span class="nc" id="L20">    return (DataSet) secretUnion.run(taskInfo.getTaskId(), taskInfo.getPartiesList(), in);</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

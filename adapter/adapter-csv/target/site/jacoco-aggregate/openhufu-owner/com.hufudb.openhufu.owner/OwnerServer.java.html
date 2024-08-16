@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>OwnerServer.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">openhufu-adapter-csv</a> &gt; <a href="../index.html" class="el_bundle">openhufu-owner</a> &gt; <a href="index.source.html" class="el_package">com.hufudb.openhufu.owner</a> &gt; <span class="el_source">OwnerServer.java</span></div><h1>OwnerServer.java</h1><pre class="source lang-java linenums">package com.hufudb.openhufu.owner;
+
+
+import io.grpc.BindableService;
+import io.grpc.Grpc;
+import io.grpc.Server;
+import io.grpc.ServerBuilder;
+import io.grpc.ServerCredentials;
+import java.io.IOException;
+import java.io.Reader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
+import com.google.gson.Gson;
+import com.hufudb.openhufu.owner.config.OwnerConfig;
+import com.hufudb.openhufu.owner.config.OwnerConfigFile;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class OwnerServer {
+<span class="nc" id="L27">  private static final Logger LOG = LoggerFactory.getLogger(OwnerServer.class);</span>
+  protected final String hostname;
+  protected final int port;
+  protected final Server server;
+  protected final OwnerService service;
+  protected final ServerCredentials creds;
+  protected final ExecutorService threadPool;
+
+<span class="nc" id="L35">  public OwnerServer(OwnerConfig config) throws IOException {</span>
+<span class="nc" id="L36">    this.hostname = config.hostname;</span>
+<span class="nc" id="L37">    this.port = config.port;</span>
+<span class="nc" id="L38">    this.threadPool = config.threadPool;</span>
+<span class="nc" id="L39">    BindableService pipeService = config.acrossOwnerRpc.getgRpcService();</span>
+<span class="nc" id="L40">    this.service = new OwnerService(config);</span>
+<span class="nc bnc" id="L41" title="All 2 branches missed.">    if (config.useTLS) {</span>
+<span class="nc" id="L42">      this.creds = config.serverCerts;</span>
+<span class="nc" id="L43">      this.server = Grpc.newServerBuilderForPort(port, creds).addService(service)</span>
+<span class="nc" id="L44">          .addService(pipeService).build();</span>
+<span class="nc" id="L45">      LOG.info(&quot;Owner Server {} start with TLS&quot;, config.party.getPartyId());</span>
+    } else {
+<span class="nc" id="L47">      this.creds = null;</span>
+<span class="nc" id="L48">      this.server = ServerBuilder.forPort(port).addService(service).addService(pipeService).build();</span>
+<span class="nc" id="L49">      LOG.info(&quot;Owner Server {} start in plaintext&quot;, config.party.getPartyId());</span>
+    }
+<span class="nc" id="L51">  }</span>
+
+  public void start() throws IOException {
+<span class="nc" id="L54">    server.start();</span>
+<span class="nc" id="L55">    LOG.info(&quot;Server started, listening on {}&quot;, port);</span>
+<span class="nc" id="L56">    Runtime.getRuntime().addShutdownHook(new Thread() {</span>
+      @Override
+      public void run() {
+<span class="nc" id="L59">        LOG.info(&quot;*** shutting down gRPC server since JVM is shutting down&quot;);</span>
+        try {
+<span class="nc" id="L61">          OwnerServer.this.stop();</span>
+<span class="nc" id="L62">        } catch (InterruptedException e) { // NOSONAR</span>
+<span class="nc" id="L63">          LOG.error(&quot;error when stop server&quot;, e);</span>
+<span class="nc" id="L64">        }</span>
+<span class="nc" id="L65">        LOG.info(&quot;*** server shut down&quot;);</span>
+<span class="nc" id="L66">      }</span>
+    });
+<span class="nc" id="L68">  }</span>
+
+  /** Stop serving requests and shutdown resources. */
+  public void stop() throws InterruptedException {
+<span class="nc bnc" id="L72" title="All 2 branches missed.">    if (server != null) {</span>
+<span class="nc" id="L73">      service.shutdown();</span>
+<span class="nc" id="L74">      server.shutdown().awaitTermination(30, TimeUnit.SECONDS);</span>
+    }
+<span class="nc" id="L76">  }</span>
+
+  /** Await termination on the main thread since the grpc library uses daemon threads. */
+  public void blockUntilShutdown() throws InterruptedException {
+<span class="nc bnc" id="L80" title="All 2 branches missed.">    if (server != null) {</span>
+<span class="nc" id="L81">      server.awaitTermination();</span>
+    }
+<span class="nc" id="L83">  }</span>
+
+  public OwnerService getService() {
+<span class="nc" id="L86">    return service;</span>
+  }
+
+  public String getEndpoint() {
+<span class="nc" id="L90">    return String.format(&quot;%s:%d&quot;, hostname, port);</span>
+  }
+
+  public static OwnerServer create(String configPath) throws IOException {
+<span class="nc" id="L94">    Gson gson = new Gson();</span>
+<span class="nc" id="L95">    Reader reader = Files.newBufferedReader(Paths.get(configPath));</span>
+<span class="nc" id="L96">    OwnerConfigFile config = gson.fromJson(reader, OwnerConfigFile.class);</span>
+<span class="nc" id="L97">    return new OwnerServer(config.generateConfig());</span>
+  }
+
+  public static void main(String[] args) {
+<span class="nc" id="L101">    Options options = new Options();</span>
+<span class="nc" id="L102">    Option cmdConfig = new Option(&quot;c&quot;, &quot;config&quot;, true, &quot;owner config file path&quot;);</span>
+<span class="nc" id="L103">    cmdConfig.setRequired(true);</span>
+<span class="nc" id="L104">    options.addOption(cmdConfig);</span>
+<span class="nc" id="L105">    CommandLineParser parser = new DefaultParser();</span>
+    CommandLine cmd;
+    try {
+<span class="nc" id="L108">      cmd = parser.parse(options, args);</span>
+<span class="nc" id="L109">      OwnerServer server = create(cmd.getOptionValue(&quot;config&quot;));</span>
+<span class="nc" id="L110">      server.start();</span>
+<span class="nc" id="L111">      server.blockUntilShutdown();</span>
+<span class="nc" id="L112">    } catch (Exception e) { // NOSONAR</span>
+<span class="nc" id="L113">      LOG.error(&quot;Error when start owner server&quot;, e);</span>
+<span class="nc" id="L114">      System.exit(1);</span>
+<span class="nc" id="L115">    }</span>
+<span class="nc" id="L116">  }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

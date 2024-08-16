@@ -1,0 +1,6 @@
+com/hufudb/openhufu/owner/adapter/postgis/PostgisResultDataSet$1.class
+com/hufudb/openhufu/owner/adapter/postgis/PostgisUtils.class
+com/hufudb/openhufu/owner/adapter/postgis/PostgisAdapterFactory.class
+com/hufudb/openhufu/owner/adapter/postgis/PostgisAdapter.class
+com/hufudb/openhufu/owner/adapter/postgis/PostgisTypeConverter.class
+com/hufudb/openhufu/owner/adapter/postgis/PostgisResultDataSet.class

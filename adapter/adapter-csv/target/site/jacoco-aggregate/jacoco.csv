@@ -1,0 +1,28 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+openhufu-adapter-csv/openhufu-owner,com.hufudb.openhufu.owner.adapter,AdapterFactory,20,0,2,0,6,0,2,0,1,0
+openhufu-adapter-csv/openhufu-owner,com.hufudb.openhufu.owner.adapter,AdapterConfig,9,0,0,0,4,0,2,0,2,0
+openhufu-adapter-csv/openhufu-owner,com.hufudb.openhufu.owner.adapter,AdapterLoader,101,0,4,0,18,0,4,0,2,0
+openhufu-adapter-csv/openhufu-owner,com.hufudb.openhufu.owner.adapter,AdapterLoader.new FileFilter() {...},8,0,0,0,2,0,2,0,2,0
+openhufu-adapter-csv/openhufu-owner,com.hufudb.openhufu.owner.adapter,AdapterTypeConverter,19,0,7,0,9,0,8,0,2,0
+openhufu-adapter-csv/openhufu-owner,com.hufudb.openhufu.owner.checker,Checker,273,0,49,0,62,0,36,0,9,0
+openhufu-adapter-csv/openhufu-owner,com.hufudb.openhufu.owner.implementor.aggregate,OwnerAggregateFunction,52,0,4,0,9,0,5,0,3,0
+openhufu-adapter-csv/openhufu-owner,com.hufudb.openhufu.owner.implementor.aggregate,OwnerAggregation,187,0,12,0,39,0,10,0,4,0
+openhufu-adapter-csv/openhufu-owner,com.hufudb.openhufu.owner.implementor.union,SafeUnion,29,0,0,0,5,0,3,0,3,0
+openhufu-adapter-csv/openhufu-owner,com.hufudb.openhufu.owner.implementor.join,JoinFilterDataSet.Iterator,44,0,2,0,7,0,5,0,4,0
+openhufu-adapter-csv/openhufu-owner,com.hufudb.openhufu.owner.implementor.join,JoinFilterDataSet,37,0,0,0,10,0,6,0,6,0
+openhufu-adapter-csv/openhufu-owner,com.hufudb.openhufu.owner.implementor.join,HashEqualJoin,311,0,20,0,60,0,20,0,10,0
+openhufu-adapter-csv/openhufu-owner,com.hufudb.openhufu.owner.adapter.jdbc,JDBCTranslator,79,0,0,0,9,0,8,0,8,0
+openhufu-adapter-csv/openhufu-owner,com.hufudb.openhufu.owner.adapter.jdbc,JDBCAdapter,372,0,18,0,80,0,22,0,13,0
+openhufu-adapter-csv/openhufu-owner,com.hufudb.openhufu.owner.implementor,OwnerImplementorFactory,214,0,0,0,41,0,6,0,6,0
+openhufu-adapter-csv/openhufu-owner,com.hufudb.openhufu.owner.implementor,OwnerSideImplementor,202,0,22,0,46,0,17,0,6,0
+openhufu-adapter-csv/openhufu-owner,com.hufudb.openhufu.owner,OwnerServer.new Thread() {...},22,0,0,0,8,0,2,0,2,0
+openhufu-adapter-csv/openhufu-owner,com.hufudb.openhufu.owner,OwnerServer,203,0,6,0,47,0,12,0,9,0
+openhufu-adapter-csv/openhufu-owner,com.hufudb.openhufu.owner,OwnerService,281,0,10,0,73,0,26,0,21,0
+openhufu-adapter-csv/openhufu-owner,com.hufudb.openhufu.owner.storage,StreamDataSet.StreamIterator,12,0,0,0,4,0,4,0,4,0
+openhufu-adapter-csv/openhufu-owner,com.hufudb.openhufu.owner.storage,StreamDataSet,86,0,6,0,24,0,9,0,6,0
+openhufu-adapter-csv/openhufu-owner,com.hufudb.openhufu.owner.config,OwnerConfig,36,0,0,0,13,0,2,0,2,0
+openhufu-adapter-csv/openhufu-owner,com.hufudb.openhufu.owner.config,ImplementorConfig,142,0,4,0,35,0,8,0,6,0
+openhufu-adapter-csv/openhufu-owner,com.hufudb.openhufu.owner.config,ImplementorConfig.Implementor,89,0,0,0,11,0,2,0,2,0
+openhufu-adapter-csv/openhufu-owner,com.hufudb.openhufu.owner.config,OwnerConfigFile,375,0,28,0,80,0,20,0,6,0
+openhufu-adapter-csv/openhufu-owner,com.hufudb.openhufu.owner.implementor.aggregate.sum,SecretSharingSum,141,0,9,0,24,0,12,0,6,0
+openhufu-adapter-csv/openhufu-owner,com.hufudb.openhufu.owner.implementor.aggregate.sum,GMWSum,152,0,2,0,24,0,7,0,6,0

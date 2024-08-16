@@ -17,19 +17,19 @@
             "feds": [
               {
                 "endpoint": "localhost:54600",
-                "name": "osm_4_0"
+                "name": "osm_7_0"
               },
               {
                 "endpoint": "localhost:54601",
-                "name": "osm_4_1"
+                "name": "osm_7_1"
               },
               {
                 "endpoint": "localhost:54602",
-                "name": "osm_4_2"
+                "name": "osm_7_2"
               },
               {
                 "endpoint": "localhost:54603",
-                "name": "osm_4_3"
+                "name": "osm_7_3"
               }
             ]
           }

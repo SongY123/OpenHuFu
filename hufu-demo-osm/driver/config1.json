@@ -6,7 +6,7 @@
     "passwd": "hufu",
     "tables": [
         {
-            "name": "osm_4_1",
+            "name": "osm_7_1",
             "columns": [
                 {
                     "name": "id",

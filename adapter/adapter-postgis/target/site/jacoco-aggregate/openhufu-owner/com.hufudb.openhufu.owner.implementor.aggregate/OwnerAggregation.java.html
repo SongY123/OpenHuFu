@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>OwnerAggregation.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">openhufu-adapter-postgis</a> &gt; <a href="../index.html" class="el_bundle">openhufu-owner</a> &gt; <a href="index.source.html" class="el_package">com.hufudb.openhufu.owner.implementor.aggregate</a> &gt; <span class="el_source">OwnerAggregation.java</span></div><h1>OwnerAggregation.java</h1><pre class="source lang-java linenums">package com.hufudb.openhufu.owner.implementor.aggregate;
+
+import com.hufudb.openhufu.expression.AggFuncType;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+
+import com.hufudb.openhufu.data.function.AggregateFunction;
+import com.hufudb.openhufu.data.schema.Schema;
+import com.hufudb.openhufu.data.storage.AggDataSet;
+import com.hufudb.openhufu.data.storage.ArrayDataSet;
+import com.hufudb.openhufu.data.storage.DataSet;
+import com.hufudb.openhufu.data.storage.EmptyDataSet;
+import com.hufudb.openhufu.data.storage.Row;
+import com.hufudb.openhufu.expression.ExpressionFactory;
+import com.hufudb.openhufu.expression.ExpressionUtils;
+import com.hufudb.openhufu.expression.SingleAggregator;
+import com.hufudb.openhufu.interpreter.Interpreter;
+import com.hufudb.openhufu.owner.implementor.OwnerImplementorFactory;
+import com.hufudb.openhufu.proto.OpenHuFuData.ColumnType;
+import com.hufudb.openhufu.proto.OpenHuFuPlan;
+import com.hufudb.openhufu.proto.OpenHuFuPlan.Expression;
+import com.hufudb.openhufu.proto.OpenHuFuPlan.TaskInfo;
+import com.hufudb.openhufu.rpc.Rpc;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+<span class="nc" id="L28">public class OwnerAggregation {</span>
+<span class="nc" id="L29">  static final Logger LOG = LoggerFactory.getLogger(OwnerAggregation.class);</span>
+
+  public static AggregateFunction getAggregateFunc(Expression exp, Rpc rpc, ExecutorService threadPool, TaskInfo taskInfo) {
+<span class="nc bnc" id="L32" title="All 2 branches missed.">    if (exp.getOpType().equals(OpenHuFuPlan.OperatorType.AGG_FUNC)) {</span>
+<span class="nc" id="L33">      LOG.info(&quot;using aggfunc: &quot; + AggFuncType.of(exp.getI32()).getName());</span>
+<span class="nc" id="L34">      return OwnerImplementorFactory.getAggregationFunction(AggFuncType.of(exp.getI32()), exp, rpc, threadPool, taskInfo);</span>
+    } else {
+<span class="nc" id="L36">      throw new UnsupportedOperationException(&quot;Just support single aggregate function&quot;);</span>
+    }
+  }
+
+  public static DataSet aggregate(DataSet input, List&lt;Integer&gt; groups, List&lt;Expression&gt; aggs, List&lt;ColumnType&gt; types, Rpc rpc, ExecutorService threadPool, TaskInfo taskInfo) {
+<span class="nc" id="L41">    List&lt;AggregateFunction&lt;Row, Comparable&gt;&gt; aggFunctions = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L42">    List&lt;ColumnType&gt; aggTypes = new ArrayList&lt;&gt;();</span>
+    // interval aggregations
+<span class="nc" id="L44">    List&lt;Expression&gt; interAggs = new ArrayList&lt;&gt;();</span>
+    // select from interval aggregations
+<span class="nc" id="L46">    List&lt;Expression&gt; finalSelects = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L47" title="All 2 branches missed.">    if (!groups.isEmpty()) {</span>
+<span class="nc" id="L48">      LOG.warn(&quot;Not support 'group by' clause&quot;);</span>
+<span class="nc" id="L49">      throw new UnsupportedOperationException(&quot;Not support 'group by' clause&quot;);</span>
+    }
+<span class="nc bnc" id="L51" title="All 2 branches missed.">    for (Expression exp : aggs) {</span>
+<span class="nc bnc" id="L52" title="All 2 branches missed.">      if (exp.getInCount() == 1) {</span>
+<span class="nc" id="L53">        int ref = interAggs.size();</span>
+<span class="nc" id="L54">        aggFunctions.add(getAggregateFunc(exp, rpc, threadPool, taskInfo));</span>
+<span class="nc" id="L55">        aggTypes.add(exp.getOutType());</span>
+<span class="nc" id="L56">        interAggs.add(exp);</span>
+<span class="nc" id="L57">        finalSelects.add(ExpressionFactory.createInputRef(ref, exp.getOutType(), exp.getModifier()));</span>
+<span class="nc" id="L58">      } else {</span>
+<span class="nc" id="L59">        Expression.Builder builder = exp.toBuilder();</span>
+<span class="nc" id="L60">        builder.clearIn();</span>
+        // todo: now we only handles one layer like DIVIDE(SUM(), SUM()),
+        //  what if there is DIVIDE(DIVIDE(SUM(), SUM()), 3)?
+<span class="nc bnc" id="L63" title="All 2 branches missed.">        for (Expression inner : exp.getInList()) {</span>
+<span class="nc" id="L64">          int ref = interAggs.size();</span>
+<span class="nc" id="L65">          aggFunctions.add(getAggregateFunc(inner, rpc, threadPool, taskInfo));</span>
+<span class="nc" id="L66">          aggTypes.add(exp.getOutType());</span>
+
+<span class="nc" id="L68">          Expression inputRef = ExpressionFactory.createInputRef(ref, inner.getOutType(), inner.getModifier());</span>
+<span class="nc" id="L69">          builder.addIn(inputRef);</span>
+
+<span class="nc" id="L71">          interAggs.add(inner);</span>
+<span class="nc" id="L72">        }</span>
+<span class="nc" id="L73">        finalSelects.add(builder.build());</span>
+      }
+<span class="nc" id="L75">    }</span>
+
+<span class="nc" id="L77">    Schema outSchema = ExpressionUtils.createSchema(interAggs);</span>
+<span class="nc" id="L78">    DataSet result = ArrayDataSet.materialize(AggDataSet.create(outSchema, new SingleAggregator(outSchema, aggFunctions), input));</span>
+
+    // reorder the output
+<span class="nc" id="L81">    result = Interpreter.map(result, finalSelects);</span>
+
+<span class="nc bnc" id="L83" title="All 2 branches missed.">    if (taskInfo.getParties(0) == rpc.ownParty().getPartyId()) {</span>
+<span class="nc" id="L84">      return result;</span>
+    } else {
+<span class="nc" id="L86">      return EmptyDataSet.INSTANCE;</span>
+    }
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

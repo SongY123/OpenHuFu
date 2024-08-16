@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>OwnerConfigFile.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">openhufu-adapter-csv</a> &gt; <a href="../index.html" class="el_bundle">openhufu-owner</a> &gt; <a href="index.source.html" class="el_package">com.hufudb.openhufu.owner.config</a> &gt; <span class="el_source">OwnerConfigFile.java</span></div><h1>OwnerConfigFile.java</h1><pre class="source lang-java linenums">package com.hufudb.openhufu.owner.config;
+
+import com.hufudb.openhufu.common.enums.DataSourceType;
+import com.hufudb.openhufu.common.exception.ErrorCode;
+import com.hufudb.openhufu.common.exception.OpenHuFuException;
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Executors;
+import com.google.common.collect.ImmutableMap;
+import com.hufudb.openhufu.data.schema.utils.PojoPublishedTableSchema;
+import com.hufudb.openhufu.mpc.ProtocolExecutor;
+import com.hufudb.openhufu.mpc.ProtocolFactory;
+import com.hufudb.openhufu.mpc.ProtocolType;
+import com.hufudb.openhufu.mpc.lib.LibraryConfig;
+import com.hufudb.openhufu.mpc.lib.LibraryLoader;
+import com.hufudb.openhufu.owner.adapter.Adapter;
+import com.hufudb.openhufu.owner.adapter.AdapterConfig;
+import com.hufudb.openhufu.owner.adapter.AdapterFactory;
+import com.hufudb.openhufu.owner.adapter.AdapterLoader;
+import com.hufudb.openhufu.proto.OpenHuFuService.OwnerInfo;
+import com.hufudb.openhufu.rpc.grpc.OpenHuFuOwnerInfo;
+import com.hufudb.openhufu.rpc.grpc.OpenHuFuRpc;
+import io.grpc.TlsChannelCredentials;
+import io.grpc.TlsServerCredentials;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class OwnerConfigFile {
+  private static final int THREAD_NUM = 8;
+<span class="nc" id="L33">  public static final Logger LOG = LoggerFactory.getLogger(OwnerConfigFile.class);</span>
+
+  public int id;
+  public int port;
+  public int threadnum;
+  public String hostname;
+  public String privatekeypath;
+  public String certchainpath;
+  public String trustcertpath;
+  public List&lt;PojoPublishedTableSchema&gt; tables;
+  public AdapterConfig adapterconfig;
+  public List&lt;LibraryConfig&gt; libraryconfigs;
+  public String implementorconfigpath;
+  public OwnerConfigFile(int id, int port, int threadnum, String hostname, String privatekeypath,
+<span class="nc" id="L47">      String certchainpath, String trustcertpath, String implementorconfigpath) {</span>
+<span class="nc" id="L48">    this.id = id;</span>
+<span class="nc" id="L49">    this.port = port;</span>
+<span class="nc" id="L50">    this.threadnum = threadnum;</span>
+<span class="nc" id="L51">    this.hostname = hostname;</span>
+<span class="nc" id="L52">    this.privatekeypath = privatekeypath;</span>
+<span class="nc" id="L53">    this.certchainpath = certchainpath;</span>
+<span class="nc" id="L54">    this.trustcertpath = trustcertpath;</span>
+<span class="nc" id="L55">    this.implementorconfigpath = implementorconfigpath;</span>
+<span class="nc" id="L56">  }</span>
+
+<span class="nc" id="L58">  public OwnerConfigFile() {}</span>
+
+  public static Adapter getAdapter(AdapterConfig config) {
+<span class="nc" id="L61">    String openHuFuRoot = System.getenv(&quot;OPENHUFU_ROOT&quot;);</span>
+<span class="nc bnc" id="L62" title="All 4 branches missed.">    if (null == openHuFuRoot || openHuFuRoot.length() == 0) {</span>
+<span class="nc" id="L63">      throw new OpenHuFuException(ErrorCode.OPENHUFU_ROOT_ENV_NOT_SET);</span>
+    }
+<span class="nc" id="L65">    Path adapterDir = Paths.get(openHuFuRoot, &quot;adapter&quot;);</span>
+<span class="nc bnc" id="L66" title="All 2 branches missed.">    if (!adapterDir.toFile().exists()) {</span>
+<span class="nc" id="L67">      throw new OpenHuFuException(ErrorCode.ADAPTER_FOLDER_NOT_FOUND, adapterDir);</span>
+    }
+<span class="nc" id="L69">    Map&lt;DataSourceType, AdapterFactory&gt; adapterFactories =</span>
+<span class="nc" id="L70">        AdapterLoader.loadAdapters(adapterDir.toString());</span>
+<span class="nc" id="L71">    AdapterFactory factory = adapterFactories.get(config.datasource);</span>
+<span class="nc bnc" id="L72" title="All 2 branches missed.">    if (factory == null) {</span>
+<span class="nc" id="L73">      LOG.error(&quot;Fail to get adapter for datasource [{}]&quot;, config.datasource);</span>
+<span class="nc" id="L74">      throw new RuntimeException(&quot;Fail to get adapter for datasource&quot;);</span>
+    }
+<span class="nc" id="L76">    return factory.create(config);</span>
+  }
+
+  public Map&lt;ProtocolType, ProtocolExecutor&gt; getLibrary() {
+<span class="nc bnc" id="L80" title="All 4 branches missed.">    if (libraryconfigs == null || libraryconfigs.isEmpty()) {</span>
+<span class="nc" id="L81">      return ImmutableMap.of();</span>
+    }
+<span class="nc" id="L83">    Path libDir = Paths.get(System.getenv(&quot;OPENHUFU_ROOT&quot;), &quot;lib&quot;);</span>
+<span class="nc" id="L84">    Map&lt;ProtocolType, ProtocolFactory&gt; factories =</span>
+<span class="nc" id="L85">        LibraryLoader.loadProtocolLibrary(libDir.toString());</span>
+<span class="nc" id="L86">    ImmutableMap.Builder&lt;ProtocolType, ProtocolExecutor&gt; libs = ImmutableMap.builder();</span>
+<span class="nc bnc" id="L87" title="All 2 branches missed.">    for (LibraryConfig config : this.libraryconfigs) {</span>
+      try {
+<span class="nc bnc" id="L89" title="All 2 branches missed.">        switch (config.name.toLowerCase()) {</span>
+          case &quot;aby&quot;:
+<span class="nc bnc" id="L91" title="All 2 branches missed.">            if (factories.containsKey(ProtocolType.ABY)) {</span>
+<span class="nc" id="L92">              OwnerInfo own = OwnerInfo.newBuilder()</span>
+<span class="nc" id="L93">                  .setEndpoint(String.format(&quot;%s:%d&quot;, hostname, config.port)).setId(id).build();</span>
+<span class="nc" id="L94">              libs.put(ProtocolType.ABY,</span>
+<span class="nc" id="L95">                  factories.get(ProtocolType.ABY).create(own, ProtocolType.ABY));</span>
+<span class="nc" id="L96">            } else {</span>
+<span class="nc" id="L97">              LOG.error(&quot;Library ABY not found&quot;);</span>
+            }
+          default:
+<span class="nc" id="L100">            LOG.error(&quot;Not support library {}&quot;, config.name);</span>
+        }
+<span class="nc" id="L102">      } catch (UnsatisfiedLinkError e) {</span>
+<span class="nc" id="L103">        LOG.error(&quot;Fail to load library {}: {}&quot;, config.name, e.getMessage());</span>
+<span class="nc" id="L104">      }</span>
+<span class="nc" id="L105">    }</span>
+<span class="nc" id="L106">    return libs.build();</span>
+  }
+
+  public OwnerConfig generateConfig() {
+<span class="nc" id="L110">    OwnerConfig config = new OwnerConfig();</span>
+<span class="nc" id="L111">    config.party = new OpenHuFuOwnerInfo(id, String.format(&quot;%s:%d&quot;, hostname, port));</span>
+<span class="nc" id="L112">    config.port = port;</span>
+<span class="nc" id="L113">    config.hostname = hostname;</span>
+<span class="nc bnc" id="L114" title="All 2 branches missed.">    if (threadnum &gt; 0) {</span>
+<span class="nc" id="L115">      config.threadPool = Executors.newFixedThreadPool(threadnum);</span>
+    } else {
+<span class="nc" id="L117">      config.threadPool = Executors.newFixedThreadPool(THREAD_NUM);</span>
+    }
+<span class="nc bnc" id="L119" title="All 4 branches missed.">    if (privatekeypath != null &amp;&amp; certchainpath != null) {</span>
+      try {
+<span class="nc" id="L121">        File certChain = new File(certchainpath);</span>
+<span class="nc" id="L122">        File privateKey = new File(privatekeypath);</span>
+<span class="nc" id="L123">        config.serverCerts = TlsServerCredentials.create(certChain, privateKey);</span>
+<span class="nc" id="L124">        config.useTLS = true;</span>
+<span class="nc" id="L125">        LOG.info(&quot;Load certChainFile and privateKeyFile&quot;);</span>
+<span class="nc" id="L126">      } catch (Exception e) {</span>
+<span class="nc" id="L127">        LOG.error(&quot;Fail to read certChainFile or privateKeyFile: {}&quot;, e.getMessage());</span>
+<span class="nc" id="L128">        config.useTLS = false;</span>
+<span class="nc" id="L129">      }</span>
+    }
+<span class="nc bnc" id="L131" title="All 2 branches missed.">    if (trustcertpath != null) {</span>
+      try {
+<span class="nc" id="L133">        File rootCert = new File(trustcertpath);</span>
+<span class="nc" id="L134">        config.clientCerts = TlsChannelCredentials.newBuilder().trustManager(rootCert).build();</span>
+<span class="nc" id="L135">        config.acrossOwnerRpc = new OpenHuFuRpc(config.party, config.threadPool, config.clientCerts);</span>
+<span class="nc" id="L136">        LOG.info(&quot;load trustcertFile&quot;);</span>
+<span class="nc" id="L137">      } catch (Exception e) {</span>
+<span class="nc" id="L138">        LOG.error(&quot;Fail to read trustcertFile: {}&quot;, e.getMessage());</span>
+<span class="nc" id="L139">        config.acrossOwnerRpc = new OpenHuFuRpc(config.party, config.threadPool);</span>
+<span class="nc" id="L140">      }</span>
+    } else {
+<span class="nc" id="L142">      config.acrossOwnerRpc = new OpenHuFuRpc(config.party, config.threadPool);</span>
+    }
+<span class="nc" id="L144">    config.adapter = getAdapter(adapterconfig);</span>
+<span class="nc" id="L145">    config.librarys = getLibrary();</span>
+<span class="nc" id="L146">    config.tables = tables;</span>
+<span class="nc bnc" id="L147" title="All 2 branches missed.">    if (implementorconfigpath == null) {</span>
+<span class="nc" id="L148">      throw new OpenHuFuException(ErrorCode.IMPLEMENTOR_CONFIG_FILE_PATH_NOT_SET);</span>
+    }
+<span class="nc" id="L150">    config.implementorConfigPath = implementorconfigpath;</span>
+<span class="nc" id="L151">    return config;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

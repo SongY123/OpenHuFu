@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>JDBCTranslator.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">openhufu-adapter-csv</a> &gt; <a href="../index.html" class="el_bundle">openhufu-owner</a> &gt; <a href="index.source.html" class="el_package">com.hufudb.openhufu.owner.adapter.jdbc</a> &gt; <span class="el_source">JDBCTranslator.java</span></div><h1>JDBCTranslator.java</h1><pre class="source lang-java linenums">package com.hufudb.openhufu.owner.adapter.jdbc;
+
+import com.hufudb.openhufu.data.schema.Schema;
+import com.hufudb.openhufu.expression.Translator;
+import com.hufudb.openhufu.proto.OpenHuFuPlan.Collation;
+import com.hufudb.openhufu.proto.OpenHuFuPlan.Expression;
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class JDBCTranslator {
+  Translator translator;
+
+<span class="nc" id="L13">  JDBCTranslator(Translator translator) {</span>
+<span class="nc" id="L14">    this.translator = translator;</span>
+<span class="nc" id="L15">  }</span>
+
+  public List&lt;String&gt; translateExps(Schema schema, List&lt;Expression&gt; exps) {
+<span class="nc" id="L18">    translator.setInput(schema.getColumnDescs().stream().map(col -&gt; col.getName()).collect(Collectors.toList()));</span>
+<span class="nc" id="L19">    return exps.stream().map(exp -&gt; translator.translate(exp)).collect(Collectors.toList());</span>
+  }
+
+  public List&lt;String&gt; translateAgg(List&lt;String&gt; selectExpStrs, List&lt;Expression&gt; aggs) {
+<span class="nc" id="L23">    translator.setInput(selectExpStrs);</span>
+<span class="nc" id="L24">    return aggs.stream().map(exp -&gt; translator.translate(exp)).collect(Collectors.toList());</span>
+  }
+
+  public List&lt;String&gt; translateOrders(List&lt;String&gt; outExpStrs, List&lt;Collation&gt; orders) {
+<span class="nc" id="L28">    return orders.stream().map(order -&gt; String.format(&quot;%s %s&quot;, outExpStrs.get(order.getRef()),</span>
+<span class="nc" id="L29">        order.getDirection().toString())).collect(Collectors.toList());</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

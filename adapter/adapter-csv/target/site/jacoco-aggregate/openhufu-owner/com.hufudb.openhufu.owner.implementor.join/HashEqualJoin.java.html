@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>HashEqualJoin.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">openhufu-adapter-csv</a> &gt; <a href="../index.html" class="el_bundle">openhufu-owner</a> &gt; <a href="index.source.html" class="el_package">com.hufudb.openhufu.owner.implementor.join</a> &gt; <span class="el_source">HashEqualJoin.java</span></div><h1>HashEqualJoin.java</h1><pre class="source lang-java linenums">package com.hufudb.openhufu.owner.implementor.join;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import com.google.common.collect.ImmutableList;
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.hufudb.openhufu.data.storage.DataSet;
+import com.hufudb.openhufu.data.storage.EmptyDataSet;
+import com.hufudb.openhufu.data.storage.HorizontalDataSet;
+import com.hufudb.openhufu.data.storage.MaterializedDataSet;
+import com.hufudb.openhufu.data.storage.ProtoDataSet;
+import com.hufudb.openhufu.data.storage.ProtoRowDataSet;
+import com.hufudb.openhufu.data.storage.VerticalDataSet;
+import com.hufudb.openhufu.mpc.ProtocolException;
+import com.hufudb.openhufu.mpc.codec.HashFunction;
+import com.hufudb.openhufu.mpc.codec.OpenHuFuCodec;
+import com.hufudb.openhufu.mpc.psi.HashPSI;
+import com.hufudb.openhufu.mpc.utils.Stream;
+import com.hufudb.openhufu.proto.OpenHuFuData.DataSetProto;
+import com.hufudb.openhufu.proto.OpenHuFuPlan.JoinCondition;
+import com.hufudb.openhufu.proto.OpenHuFuPlan.TaskInfo;
+import com.hufudb.openhufu.rpc.Rpc;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class HashEqualJoin implements OwnerJoin {
+  static final int MAX_SIZE = 1000;
+<span class="nc" id="L29">  static final Logger LOG = LoggerFactory.getLogger(HashEqualJoin.class);</span>
+
+<span class="nc" id="L31">  public HashEqualJoin() {</span>
+<span class="nc" id="L32">  }</span>
+
+  static List&lt;byte[]&gt; encode(List&lt;Integer&gt; keys, DataSet dataSet) {
+<span class="nc" id="L35">    ProtoRowDataSet keySets = ProtoRowDataSet.project(dataSet, keys);</span>
+<span class="nc" id="L36">    return keySets.toBytes();</span>
+  }
+
+  static List&lt;byte[]&gt; encode(DataSet source) {
+<span class="nc" id="L40">    return ProtoDataSet.slice(source, MAX_SIZE).stream().map(proto -&gt; proto.toByteArray())</span>
+<span class="nc" id="L41">        .collect(Collectors.toList());</span>
+  }
+
+  MaterializedDataSet decode(List&lt;byte[]&gt; payload) {
+    try {
+<span class="nc" id="L46">      List&lt;ProtoDataSet&gt; dataSets = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L47" title="All 2 branches missed.">      for (byte[] b : payload) {</span>
+<span class="nc" id="L48">        dataSets.add(ProtoDataSet.create(DataSetProto.parseFrom(b)));</span>
+<span class="nc" id="L49">      }</span>
+<span class="nc" id="L50">      return new HorizontalDataSet(dataSets);</span>
+<span class="nc" id="L51">    } catch (InvalidProtocolBufferException e) {</span>
+<span class="nc" id="L52">      LOG.error(&quot;Fail to parse dataset in receiver: %d&quot;, e.getMessage());</span>
+<span class="nc" id="L53">      throw new RuntimeException(&quot;Fail to parse dataset in receiver&quot;);</span>
+    }
+  }
+
+  @Override
+  public DataSet join(DataSet in, JoinCondition joinCond, boolean isLeft, Rpc rpc, TaskInfo taskInfo)
+      throws ProtocolException {
+<span class="nc bnc" id="L60" title="All 2 branches missed.">    if (joinCond.hasCondition()) {</span>
+<span class="nc" id="L61">      LOG.error(&quot;HashEqualJoin not support theta join&quot;);</span>
+<span class="nc" id="L62">      throw new UnsupportedOperationException(&quot;HashEqualJoin not support theta join&quot;);</span>
+    }
+    // note: require the party of left table precede the party of right table
+<span class="nc" id="L65">    List&lt;Integer&gt; parties = taskInfo.getPartiesList();</span>
+<span class="nc bnc" id="L66" title="All 2 branches missed.">    if (parties.size() != 2) {</span>
+<span class="nc" id="L67">      LOG.error(&quot;HashEqualJoin only support two parties&quot;);</span>
+<span class="nc" id="L68">      throw new UnsupportedOperationException(&quot;HashEqualJoin only support two parties&quot;);</span>
+    }
+<span class="nc" id="L70">    HashPSI psi = new HashPSI(rpc);</span>
+<span class="nc" id="L71">    Stream st = new Stream(rpc);</span>
+    List&lt;byte[]&gt; joinKey;
+    // At present, the left party collect result
+<span class="nc" id="L74">    int receiverId = parties.get(0);</span>
+<span class="nc" id="L75">    int senderId = parties.get(1);</span>
+<span class="nc" id="L76">    MaterializedDataSet localSet = ProtoDataSet.materialize(in);</span>
+    // todo: choose collector by data size
+<span class="nc bnc" id="L78" title="All 2 branches missed.">    if (isLeft) {</span>
+<span class="nc bnc" id="L79" title="All 2 branches missed.">      assert parties.get(0) == rpc.ownParty().getPartyId();</span>
+<span class="nc" id="L80">      long startTime = System.currentTimeMillis();</span>
+<span class="nc" id="L81">      joinKey = encode(joinCond.getLeftKeyList(), localSet);</span>
+<span class="nc" id="L82">      long endTime = System.currentTimeMillis();</span>
+<span class="nc" id="L83">      LOG.info(&quot;Left encode use {} ms&quot;, endTime - startTime);</span>
+<span class="nc" id="L84">    } else {</span>
+<span class="nc bnc" id="L85" title="All 2 branches missed.">      assert parties.get(1) == rpc.ownParty().getPartyId();</span>
+<span class="nc" id="L86">      long startTime = System.currentTimeMillis();</span>
+<span class="nc" id="L87">      joinKey = encode(joinCond.getRightKeyList(), localSet);</span>
+<span class="nc" id="L88">      long endTime = System.currentTimeMillis();</span>
+<span class="nc" id="L89">      LOG.info(&quot;Right encode use {} ms&quot;, endTime - startTime);</span>
+    }
+<span class="nc" id="L91">    List&lt;byte[]&gt; res = (List&lt;byte[]&gt;) psi.run(taskInfo.getTaskId(), parties, joinKey, HashFunction.SHA256.getId());</span>
+<span class="nc" id="L92">    LOG.debug(&quot;Get {} rows in HashPSI&quot;, res.size());</span>
+<span class="nc bnc" id="L93" title="All 2 branches missed.">    if (res.size() == 0) {</span>
+<span class="nc" id="L94">      return EmptyDataSet.INSTANCE;</span>
+    }
+<span class="nc" id="L96">    localSet = new JoinFilterDataSet(localSet,</span>
+<span class="nc" id="L97">        res.stream().map(b -&gt; OpenHuFuCodec.decodeInt(b)).collect(Collectors.toList()));</span>
+<span class="nc bnc" id="L98" title="All 2 branches missed.">    if (senderId == rpc.ownParty().getPartyId()) {</span>
+<span class="nc" id="L99">      return senderProcedure(localSet, taskInfo.getTaskId(), senderId, receiverId, st);</span>
+<span class="nc bnc" id="L100" title="All 2 branches missed.">    } else if (receiverId == rpc.ownParty().getPartyId()) {</span>
+<span class="nc" id="L101">      return receiverProcedure(localSet, taskInfo.getTaskId(), senderId, receiverId, st);</span>
+    } else {
+<span class="nc" id="L103">      LOG.error(&quot;{} not found in participants of HashEqualJoin&quot;, rpc.ownParty());</span>
+<span class="nc" id="L104">      throw new RuntimeException(&quot;Not participant of HashEqualJoin&quot;);</span>
+    }
+  }
+
+  DataSet senderProcedure(MaterializedDataSet in, long taskId, int senderId, int receiverId,
+      Stream stream) throws ProtocolException {
+<span class="nc" id="L110">    List&lt;byte[]&gt; inputs = encode(in);</span>
+<span class="nc" id="L111">    stream.run(taskId, ImmutableList.of(senderId, receiverId), inputs);</span>
+<span class="nc" id="L112">    return EmptyDataSet.INSTANCE;</span>
+  }
+
+  DataSet receiverProcedure(MaterializedDataSet localDataSet, long taskId, int senderId, int receiverId,
+      Stream stream) throws ProtocolException {
+<span class="nc" id="L117">    List&lt;byte[]&gt; result = (List&lt;byte[]&gt;)</span>
+<span class="nc" id="L118">        stream.run(taskId, ImmutableList.of(senderId, receiverId), ImmutableList.of());</span>
+<span class="nc" id="L119">    MaterializedDataSet remoteDataSet = decode(result);</span>
+<span class="nc bnc" id="L120" title="All 2 branches missed.">    if (remoteDataSet.rowCount() == 0) {</span>
+<span class="nc" id="L121">      return EmptyDataSet.INSTANCE;</span>
+    } else {
+<span class="nc" id="L123">      return VerticalDataSet.create(localDataSet, remoteDataSet);</span>
+    }
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
